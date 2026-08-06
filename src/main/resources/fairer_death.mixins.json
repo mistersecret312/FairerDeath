@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.mistersecret312.fairerdeath.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "FairerDeath.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
