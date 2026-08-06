@@ -1,5 +1,9 @@
 package net.mistersecret312.fairerdeath;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -18,10 +22,15 @@ public class FairerDeath
 {
     public static final String MODID = "fairer_death";
 
+    public static final TagKey<Item> KEEP_AT_DEATH = TagKey.create(Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(MODID, "keep_at_death"));
+
     public FairerDeath(IEventBus modEventBus, ModContainer modContainer)
     {
         modEventBus.addListener(this::commonSetup);
         NeoForge.EVENT_BUS.register(this);
+
+        AttachmentTypeInit.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         if(dist.isClient())

@@ -14,6 +14,7 @@ public class Config
     public static final ModConfigSpec.ConfigValue<List<? extends String>> CATEGORIES;
     public static final ModConfigSpec.ConfigValue<Modes> MODE;
 
+    public static final ModConfigSpec.IntValue AGE_TICKS;
     public static final ModConfigSpec.DoubleValue RANDOM_CHANCE;
 
     static
@@ -24,6 +25,9 @@ public class Config
         RANDOM_CHANCE = SERVER_BUILDER
                                 .comment("If Mode is Random, will use this chance for the chance to keep an item")
                                 .defineInRange("random_chance", 0.5d, 0d, 1d);
+        AGE_TICKS = SERVER_BUILDER
+                            .comment("If Mode is Old, will use this as amount of ticks you must have an item for, for it to be kept at death")
+                            .defineInRange("age_ticks", 1200, 0, Integer.MAX_VALUE);
 
         CATEGORIES = SERVER_BUILDER
                              .comment("A list of enabled categories")
