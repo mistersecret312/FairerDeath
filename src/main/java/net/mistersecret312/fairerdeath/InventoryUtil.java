@@ -140,6 +140,22 @@ public class InventoryUtil
 			ItemEntity entity = iterator.next();
 			ItemStack stack = entity.getItem();
 
+			boolean isDropped = false;
+			for (int i = 0; i < dropped.size(); i++)
+			{
+				ItemStack rejected = dropped.get(i);
+
+				if (ItemStack.isSameItemSameComponents(stack, rejected) && stack.getCount() == rejected.getCount())
+				{
+					dropped.remove(i);
+					isDropped = true;
+					break;
+				}
+			}
+
+			if (isDropped)
+				continue;
+
 			boolean keep = false;
 			switch (mode)
 			{

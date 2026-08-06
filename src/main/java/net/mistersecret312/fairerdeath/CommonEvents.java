@@ -95,7 +95,8 @@ public class CommonEvents
 			}
 			else
 			{
-				ItemHandlerHelper.giveItemToPlayer(serverPlayer, saved.stack().copy());
+				if(!inv.add(saved.slot(), saved.stack().copy()))
+					serverPlayer.drop(saved.stack().copy(), true, false);
 			}
 		}
 
