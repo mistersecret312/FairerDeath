@@ -1,21 +1,20 @@
 package net.mistersecret312.fairerdeath;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import org.jetbrains.annotations.UnknownNullability;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
-public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
+public class InventoryStorageCapability implements INBTSerializable<CompoundTag>
 {
 	public List<Item> savedItems = new ArrayList<>();
 	public List<ItemStack> droppedItems = new ArrayList<>();
@@ -130,21 +129,17 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 	}
 
 	@Override
-	public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider)
+	public CompoundTag serializeNBT()
 	{
 		CompoundTag tag = new CompoundTag();
 
 		ListTag savedList = new ListTag();
 		for(Item savedItem : savedItems)
 		{
-			Optional<Tag> stackTag = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, savedItem.stack).resultOrPartial();
-			if(stackTag.isPresent())
-			{
-				CompoundTag itemTag = new CompoundTag();
-				itemTag.putInt("slot", savedItem.slot);
-				itemTag.put("item", stackTag.get());
-				savedList.add(itemTag);
-			}
+			CompoundTag itemTag = new CompoundTag();
+			itemTag.putInt("slot", savedItem.slot);
+			itemTag.put("item", savedItem.stack.save(new CompoundTag()));
+			savedList.add(itemTag);
 		}
 		tag.put("saved_items", savedList);
 
@@ -154,13 +149,13 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 			CompoundTag entryTag = new CompoundTag();
 			ItemKey key = entry.getKey();
 
-			ItemStack dummyStack = new ItemStack(key.item(), 1);
-			dummyStack.applyComponents(key.components());
-
-			Optional<Tag> encodedItem = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, dummyStack).resultOrPartial();
-			if (encodedItem.isEmpty())
-				continue;
-			entryTag.put("item_key", encodedItem.get());
+			ResourceLocation regName = ForgeRegistries.ITEMS.getKey(key.item());
+			if (regName != null) {
+				entryTag.putString("item_name", regName.toString());
+			}
+			if (key.tag() != null) {
+				entryTag.put("item_tag", key.tag());
+			}
 
 			ListTag batchList = new ListTag();
 			for (ItemBatch batch : entry.getValue())
@@ -175,6 +170,7 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 			trackerList.add(entryTag);
 		}
 		tag.put("tracker", trackerList);
+
 		tag.putInt("kept_xp", this.keptExperience);
 
 		ListTag xpList = new ListTag();
@@ -191,7 +187,7 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 	}
 
 	@Override
-	public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag)
+	public void deserializeNBT(CompoundTag tag)
 	{
 		this.savedItems.clear();
 		this.tracker.clear();
@@ -200,30 +196,31 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 		this.droppedItems.clear();
 		this.lastKnownXp = 0;
 
-		ListTag listTag = tag.getList("saved_items", ListTag.TAG_COMPOUND);
+		ListTag listTag = tag.getList("saved_items", Tag.TAG_COMPOUND);
 		for(int i = 0; i < listTag.size(); i++)
 		{
 			CompoundTag itemTag = listTag.getCompound(i);
 			int slot = itemTag.getInt("slot");
-			Optional<ItemStack> optionalStack = ItemStack.CODEC.parse(NbtOps.INSTANCE, itemTag.get("item")).resultOrPartial();
-			ItemStack stack = ItemStack.EMPTY;
-			if(optionalStack.isPresent())
-				stack = optionalStack.get();
+			ItemStack stack = ItemStack.of(itemTag.getCompound("item"));
 
 			if(!stack.isEmpty())
 				this.savedItems.add(new Item(slot, stack));
 		}
 
+		// 2. Deserialize Tracker
 		ListTag trackerList = tag.getList("tracker", Tag.TAG_COMPOUND);
 		for (int i = 0; i < trackerList.size(); i++)
 		{
 			CompoundTag entryTag = trackerList.getCompound(i);
 
-			Optional<ItemStack> decodedStack = ItemStack.CODEC.parse(NbtOps.INSTANCE, entryTag.get("item_key")).resultOrPartial();
-			if (decodedStack.isEmpty() || decodedStack.get().isEmpty())
-				continue;
+			ResourceLocation regName = new ResourceLocation(entryTag.getString("item_name"));
+			net.minecraft.world.item.Item item = ForgeRegistries.ITEMS.getValue(regName);
 
-			ItemKey key = ItemKey.from(decodedStack.get());
+			if (item == null || item == Items.AIR) continue;
+
+			CompoundTag itemTag = entryTag.contains("item_tag") ? entryTag.getCompound("item_tag") : null;
+			ItemKey key = new ItemKey(item, itemTag);
+
 			LinkedList<ItemBatch> batches = new LinkedList<>();
 			int totalCountForThisItem = 0;
 
@@ -257,17 +254,23 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 	}
 
 	public record Item(int slot, ItemStack stack) {}
-	
-	public record ItemKey(net.minecraft.world.item.Item item, DataComponentPatch components)
+
+	public record ItemKey(net.minecraft.world.item.Item item, @Nullable CompoundTag tag)
 	{
 		public static ItemKey from(ItemStack stack)
 		{
-			ItemStack normalized = stack.copy();
+			CompoundTag tagCopy = stack.hasTag() ? stack.getTag().copy() : null;
 
-			if (normalized.isDamageableItem())
-				normalized.setDamageValue(0);
+			// In 1.20.1, durability is stored directly in the NBT as the "Damage" key.
+			// To ensure a slightly used tool stacks with a brand-new tool, we strip it.
+			if (tagCopy != null && stack.isDamageableItem()) {
+				tagCopy.remove("Damage");
+				if (tagCopy.isEmpty()) {
+					tagCopy = null; // A brand new item has no tag at all
+				}
+			}
 
-			return new ItemKey(normalized.getItem(), normalized.getComponentsPatch());
+			return new ItemKey(stack.getItem(), tagCopy);
 		}
 	}
 

@@ -1,13 +1,13 @@
 package net.mistersecret312.fairerdeath;
 
-import java.util.*;
-
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.mistersecret312.fairerdeath.InventoryStorageAttachment.ItemKey;
-import net.mistersecret312.fairerdeath.InventoryStorageAttachment.Item;
+import net.mistersecret312.fairerdeath.InventoryStorageCapability.Item;
+import net.mistersecret312.fairerdeath.InventoryStorageCapability.ItemKey;
+
+import java.util.*;
 
 public class InventoryUtil
 {
@@ -19,10 +19,15 @@ public class InventoryUtil
 
 		if (mode == Modes.OLD)
 		{
-			InventoryStorageAttachment tracker = player.getData(AttachmentTypeInit.STORAGE);
+			Optional<InventoryStorageCapability> trackerOptional =
+					player.getCapability(CapabilityInit.STORAGE).resolve();
+			if(trackerOptional.isEmpty())
+				return saved;
+
+			InventoryStorageCapability tracker = trackerOptional.get();
 			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
 
-			for (int i = 0; i < inv.getContainerSize(); i++) 
+			for (int i = 0; i < inv.getContainerSize(); i++)
 			{
 				ItemStack stack = inv.getItem(i);
 				if (stack.isEmpty())
@@ -86,8 +91,13 @@ public class InventoryUtil
 
 		if (mode == Modes.OLD) 
 		{
-			InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
-			Map<ItemKey, Integer> quotas = storage.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
+			Optional<InventoryStorageCapability> trackerOptional =
+					player.getCapability(CapabilityInit.STORAGE).resolve();
+			if(trackerOptional.isEmpty())
+				return saved;
+
+			InventoryStorageCapability tracker = trackerOptional.get();
+			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
 
 			while (iterator.hasNext())
 			{
@@ -99,7 +109,7 @@ public class InventoryUtil
 				{
 					ItemStack rejected = dropped.get(i);
 
-					if (ItemStack.isSameItemSameComponents(stack, rejected) && stack.getCount() == rejected.getCount())
+					if (ItemStack.isSameItemSameTags(stack, rejected) && stack.getCount() == rejected.getCount())
 					{
 						dropped.remove(i);
 						isDropped = true;
@@ -146,7 +156,7 @@ public class InventoryUtil
 			{
 				ItemStack rejected = dropped.get(i);
 
-				if (ItemStack.isSameItemSameComponents(stack, rejected) && stack.getCount() == rejected.getCount())
+				if (ItemStack.isSameItemSameTags(stack, rejected) && stack.getCount() == rejected.getCount())
 				{
 					dropped.remove(i);
 					isDropped = true;
@@ -182,7 +192,12 @@ public class InventoryUtil
 			case CATEGORIES -> categories.contains(Categories.KEEP_EXPERIENCE) ? player.totalExperience : 0;
 			case RANDOM -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
 			case OLD -> {
-				InventoryStorageAttachment tracker = player.getData(AttachmentTypeInit.STORAGE);
+				Optional<InventoryStorageCapability> trackerOptional =
+						player.getCapability(CapabilityInit.STORAGE).resolve();
+				if(trackerOptional.isEmpty())
+					yield 0;
+
+				InventoryStorageCapability tracker = trackerOptional.get();
 				yield tracker.getKeepXpQuota(player.level().getGameTime(), Config.AGE_TICKS.get());
 			}
 			case FULL -> player.totalExperience;

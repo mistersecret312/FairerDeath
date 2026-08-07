@@ -2,34 +2,38 @@ package net.mistersecret312.fairerdeath;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
-import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-@EventBusSubscriber(modid = FairerDeath.MODID, bus = EventBusSubscriber.Bus.GAME)
+@Mod.EventBusSubscriber(modid = FairerDeath.MODID)
 public class CommonEvents
 {
 	@SubscribeEvent
-	public static void onPlayerTick(PlayerTickEvent.Post event)
+	public static void onPlayerTick(TickEvent.PlayerTickEvent event)
 	{
-		if (event.getEntity().level().isClientSide() || event.getEntity().tickCount % 20 != 0)
+		if (event.player.level().isClientSide() || event.player.tickCount % 20 != 0)
 			return;
 
-		if (Config.MODE.get() == Modes.OLD && event.getEntity() instanceof ServerPlayer player)
+		if (Config.MODE.get() == Modes.OLD && event.player instanceof ServerPlayer player)
 		{
-			InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
-			storage.updateTracker(player);
+			Optional<InventoryStorageCapability> trackerOptional =
+					player.getCapability(CapabilityInit.STORAGE).resolve();
+			if(trackerOptional.isEmpty())
+				return;
+
+			InventoryStorageCapability tracker = trackerOptional.get();
+			tracker.updateTracker(player);
 		}
 	}
 
@@ -39,14 +43,19 @@ public class CommonEvents
 		if (!(event.getEntity() instanceof ServerPlayer player))
 			return;
 
-		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
+		Optional<InventoryStorageCapability> trackerOptional =
+				player.getCapability(CapabilityInit.STORAGE).resolve();
+		if(trackerOptional.isEmpty())
+			return;
+
+		InventoryStorageCapability tracker = trackerOptional.get();
 		Modes mode = Config.MODE.get();
 		Set<Categories> categories = Config.getEnabledCategories();
 
-		List<InventoryStorageAttachment.Item> keptItems = InventoryUtil.extractItems(player, mode, categories, storage.droppedItems);
-		storage.savedItems.addAll(keptItems);
+		List<InventoryStorageCapability.Item> keptItems = InventoryUtil.extractItems(player, mode, categories, tracker.droppedItems);
+		tracker.savedItems.addAll(keptItems);
 
-		storage.keptExperience = InventoryUtil.getKeptExperience(player, mode, categories);
+		tracker.keptExperience = InventoryUtil.getKeptExperience(player, mode, categories);
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)
@@ -55,12 +64,17 @@ public class CommonEvents
 		if (!(event.getEntity() instanceof ServerPlayer player))
 			return;
 
-		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
+		Optional<InventoryStorageCapability> trackerOptional =
+				player.getCapability(CapabilityInit.STORAGE).resolve();
+		if(trackerOptional.isEmpty())
+			return;
+
+		InventoryStorageCapability tracker = trackerOptional.get();
 		Modes mode = Config.MODE.get();
 		Set<Categories> categories = Config.getEnabledCategories();
 
-		List<InventoryStorageAttachment.Item> keptDrops = InventoryUtil.extractItems(player, event.getDrops(), mode, categories, storage.droppedItems);
-		storage.savedItems.addAll(keptDrops);
+		List<InventoryStorageCapability.Item> keptDrops = InventoryUtil.extractItems(player, event.getDrops(), mode, categories, tracker.droppedItems);
+		tracker.savedItems.addAll(keptDrops);
 	}
 
 	@SubscribeEvent
@@ -69,11 +83,16 @@ public class CommonEvents
 		if(!(event.getEntity() instanceof ServerPlayer player))
 			return;
 
-		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
-		if(storage.keptExperience > 0)
+		Optional<InventoryStorageCapability> trackerOptional =
+				player.getCapability(CapabilityInit.STORAGE).resolve();
+		if(trackerOptional.isEmpty())
+			return;
+
+		InventoryStorageCapability tracker = trackerOptional.get();
+		if(tracker.keptExperience > 0)
 		{
 			int vanillaDrop = event.getDroppedExperience();
-			event.setDroppedExperience(Math.max(0, vanillaDrop - storage.keptExperience));
+			event.setDroppedExperience(Math.max(0, vanillaDrop - tracker.keptExperience));
 		}
 	}
 
@@ -81,14 +100,26 @@ public class CommonEvents
 	public static void onPlayerClone(PlayerEvent.Clone event)
 	{
 		if (!event.isWasDeath() || !(event.getEntity() instanceof ServerPlayer serverPlayer))
+		{
 			return;
+		}
+
 
 		ServerPlayer oldPlayer = (ServerPlayer) event.getOriginal();
-		InventoryStorageAttachment storage = oldPlayer.getData(AttachmentTypeInit.STORAGE);
+		oldPlayer.reviveCaps();
+		Optional<InventoryStorageCapability> trackerOptional =
+				oldPlayer.getCapability(CapabilityInit.STORAGE).resolve();
+		if(trackerOptional.isEmpty())
+		{
+			return;
+		}
+
+
+		InventoryStorageCapability tracker = trackerOptional.get();
 
 		Inventory inv = serverPlayer.getInventory();
 
-		for (InventoryStorageAttachment.Item saved : storage.savedItems)
+		for (InventoryStorageCapability.Item saved : tracker.savedItems)
 		{
 			if (saved.slot() >= 0 && saved.slot() < inv.getContainerSize())
 				inv.setItem(saved.slot(), saved.stack().copy());
@@ -96,7 +127,7 @@ public class CommonEvents
 					serverPlayer.drop(saved.stack().copy(), true, false);
 		}
 
-		if (storage.keptExperience > 0)
-			serverPlayer.giveExperiencePoints(storage.keptExperience);
+		if (tracker.keptExperience > 0)
+			serverPlayer.giveExperiencePoints(tracker.keptExperience);
 	}
 }
