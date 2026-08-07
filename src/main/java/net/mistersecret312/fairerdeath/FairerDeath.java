@@ -21,34 +21,16 @@ import static net.neoforged.fml.loading.FMLEnvironment.dist;
 public class FairerDeath
 {
     public static final String MODID = "fairer_death";
-
     public static final TagKey<Item> KEEP_AT_DEATH = TagKey.create(Registries.ITEM,
             ResourceLocation.fromNamespaceAndPath(MODID, "keep_at_death"));
 
     public FairerDeath(IEventBus modEventBus, ModContainer modContainer)
     {
-        modEventBus.addListener(this::commonSetup);
         NeoForge.EVENT_BUS.register(this);
 
         AttachmentTypeInit.register(modEventBus);
-
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         if(dist.isClient())
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-    }
-
-    private void commonSetup(final FMLCommonSetupEvent event)
-    {
-
-    }
-
-
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event)
-    {
-        for(Categories category : Config.getEnabledCategories())
-        {
-            System.out.println("loaded category - " + category);
-        }
     }
 }

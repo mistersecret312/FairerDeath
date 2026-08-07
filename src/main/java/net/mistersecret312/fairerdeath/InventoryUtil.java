@@ -7,12 +7,13 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.mistersecret312.fairerdeath.InventoryStorageAttachment.ItemKey;
+import net.mistersecret312.fairerdeath.InventoryStorageAttachment.Item;
 
 public class InventoryUtil
 {
-	public static List<InventoryStorageAttachment.Item> extractItems(ServerPlayer player, Modes mode, Set<Categories> categories, List<ItemStack> droppedItems)
+	public static List<Item> extractItems(ServerPlayer player, Modes mode, Set<Categories> categories, List<ItemStack> droppedItems)
 	{
-		List<InventoryStorageAttachment.Item> saved = new ArrayList<>();
+		List<Item> saved = new ArrayList<>();
 		Inventory inv = player.getInventory();
 		Random random = new Random();
 
@@ -36,7 +37,7 @@ public class InventoryUtil
 
 					ItemStack keptStack = stack.copy();
 					keptStack.setCount(amountToKeep);
-					saved.add(new InventoryStorageAttachment.Item(i, keptStack));
+					saved.add(new Item(i, keptStack));
 
 					stack.shrink(amountToKeep);
 					if (stack.isEmpty())
@@ -64,12 +65,11 @@ public class InventoryUtil
 				case RANDOM -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
 				case CATEGORIES -> keep = keepByCategory(i, categories);
 				case FULL -> keep = true;
-				case null, default -> keep = false;
 			}
 
 			if (keep)
 			{
-				saved.add(new InventoryStorageAttachment.Item(i, stack.copy()));
+				saved.add(new Item(i, stack.copy()));
 				inv.setItem(i, ItemStack.EMPTY);
 			}
 			else droppedItems.add(stack.copy());
@@ -77,9 +77,10 @@ public class InventoryUtil
 		return saved;
 	}
 
-	public static List<InventoryStorageAttachment.Item> extractItems(ServerPlayer player, Collection<ItemEntity> drops, Modes mode, Set<Categories> categories, List<ItemStack> dropped)
+	public static List<Item> extractItems(ServerPlayer player, Collection<ItemEntity> drops,
+										  Modes mode, Set<Categories> categories, List<ItemStack> dropped)
 	{
-		List<InventoryStorageAttachment.Item> saved = new ArrayList<>();
+		List<Item> saved = new ArrayList<>();
 		Random random = new Random();
 		Iterator<ItemEntity> iterator = drops.iterator();
 
@@ -116,7 +117,7 @@ public class InventoryUtil
 				{
 					if (stack.getCount() <= quota)
 					{
-						saved.add(new InventoryStorageAttachment.Item(-1, stack.copy()));
+						saved.add(new Item(-1, stack.copy()));
 						quotas.put(key, quota - stack.getCount());
 						iterator.remove();
 					}
@@ -124,7 +125,7 @@ public class InventoryUtil
 					{
 						ItemStack keptStack = stack.copy();
 						keptStack.setCount(quota);
-						saved.add(new InventoryStorageAttachment.Item(-1, keptStack));
+						saved.add(new Item(-1, keptStack));
 
 						stack.shrink(quota);
 						entity.setItem(stack);
@@ -167,7 +168,7 @@ public class InventoryUtil
 
 			if (keep)
 			{
-				saved.add(new InventoryStorageAttachment.Item(-1, stack.copy()));
+				saved.add(new Item(-1, stack.copy()));
 				iterator.remove();
 			}
 		}

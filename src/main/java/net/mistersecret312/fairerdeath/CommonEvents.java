@@ -52,7 +52,8 @@ public class CommonEvents
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void onPlayerDrop(LivingDropsEvent event)
 	{
-		if (!(event.getEntity() instanceof ServerPlayer player)) return;
+		if (!(event.getEntity() instanceof ServerPlayer player))
+			return;
 
 		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
 		Modes mode = Config.MODE.get();
@@ -67,8 +68,8 @@ public class CommonEvents
 	{
 		if(!(event.getEntity() instanceof ServerPlayer player))
 			return;
-		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
 
+		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
 		if(storage.keptExperience > 0)
 		{
 			int vanillaDrop = event.getDroppedExperience();
@@ -90,14 +91,9 @@ public class CommonEvents
 		for (InventoryStorageAttachment.Item saved : storage.savedItems)
 		{
 			if (saved.slot() >= 0 && saved.slot() < inv.getContainerSize())
-			{
 				inv.setItem(saved.slot(), saved.stack().copy());
-			}
-			else
-			{
-				if(!inv.add(saved.slot(), saved.stack().copy()))
+			else if(!inv.add(saved.slot(), saved.stack().copy()))
 					serverPlayer.drop(saved.stack().copy(), true, false);
-			}
 		}
 
 		if (storage.keptExperience > 0)

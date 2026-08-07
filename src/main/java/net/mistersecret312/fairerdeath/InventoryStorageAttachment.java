@@ -118,12 +118,13 @@ public class InventoryStorageAttachment implements INBTSerializable<CompoundTag>
 		return quotas;
 	}
 
-	public int getKeepXpQuota(long currentTime, long ticksRequired) {
+	public int getKeepXpQuota(long currentTime, long ticksRequired)
+	{
 		int oldEnoughXp = 0;
-		for (XpBatch batch : xpTracker) {
-			if (currentTime - batch.timestamp >= ticksRequired) {
+		for (XpBatch batch : xpTracker)
+		{
+			if (currentTime - batch.timestamp >= ticksRequired)
 				oldEnoughXp += batch.count;
-			}
 		}
 		return oldEnoughXp;
 	}
