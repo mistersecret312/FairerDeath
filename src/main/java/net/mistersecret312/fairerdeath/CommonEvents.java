@@ -14,9 +14,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @EventBusSubscriber(modid = FairerDeath.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -28,7 +26,7 @@ public class CommonEvents
 		if (event.getEntity().level().isClientSide() || event.getEntity().tickCount % 20 != 0)
 			return;
 
-		if (Config.MODE.get() == Modes.AGE && event.getEntity() instanceof ServerPlayer player)
+		if (Config.KEEPING_MODE.get() == Modes.AGE && event.getEntity() instanceof ServerPlayer player)
 		{
 			InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
 			storage.updateTracker(player);
@@ -42,7 +40,7 @@ public class CommonEvents
 			return;
 
 		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
-		Modes mode = Config.MODE.get();
+		Modes mode = Config.KEEPING_MODE.get();
 		Set<Categories> categories = Config.getEnabledCategories();
 
 		List<InventoryStorageAttachment.Item> keptItems = InventoryUtil.extractItems(player, mode, categories, storage.droppedItems);
@@ -58,7 +56,7 @@ public class CommonEvents
 			return;
 
 		InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
-		Modes mode = Config.MODE.get();
+		Modes mode = Config.KEEPING_MODE.get();
 		Set<Categories> categories = Config.getEnabledCategories();
 
 		List<InventoryStorageAttachment.Item> keptDrops = InventoryUtil.extractItems(player, event.getDrops(), mode, categories, storage.droppedItems);

@@ -1,14 +1,19 @@
 {
-  "fairer_death.configuration.mode": "Mode",
-  "fairer_death.configuration.random_chance": "Random Chance",
-  "fairer_death.configuration.categories": "Categories",
-  "fairer_death.configuration.section.fairer.death.server.toml.title": "Fairer Death Server Configuration",
-  "fairer_death.configuration.random_chance.tooltip": "If Mode is Random, will use this chance for the chance to keep an item",
   "fairer_death.configuration.title": "Fairer Death Server Configuration",
-  "fairer_death.configuration.categories.button": "Categories",
-  "fairer_death.configuration.mode.tooltip": "Current Mode \nAllowed Values: FULL, OLD, RANDOM, CATEGORIES, TAG",
-  "fairer_death.configuration.section.fairer.death.server.toml": "Fairer Death Server Configuration",
-  "fairer_death.configuration.categories.tooltip": "A list of enabled categories \nAllowed Values: KEEP_INVENTORY, KEEP_HOTBAR, KEEP_ARMOR, KEEP_EXPERIENCE",
-  "fairer_death.configuration.age_ticks": "Age Ticks",
-  "fairer_death.configuration.age_ticks.tooltip": "If Mode is Old, will use this as amount of ticks you must have an item for, for it to be kept at death"
+
+  "fairer_death.configuration.section.fairer.death.server.toml.title": "Fairer Death",
+  "fairer_death.configuration.section.fairer.death.server.toml": "Server Configuration",
+
+  "fairer_death.configuration.keeping_mode": "Keeping mode",
+  "fairer_death.configuration.keeping_mode.tooltip": "Defines inventory keeping mode. \nAllowed Values: FULL, AGE, CHANCE, CATEGORIES, TAG",
+
+  "fairer_death.configuration.chance_to_keep": "Chance to keep",
+  "fairer_death.configuration.chance_to_keep.tooltip": "If mode is CHANCE, will use this chance to roll to keep an item.",
+
+  "fairer_death.configuration.age_to_keep": "Age to keep",
+  "fairer_death.configuration.age_ticks.tooltip": "If mode is AGE, the item will be kept on death if it was for this long in the inventory.",
+
+  "fairer_death.configuration.categories_to_keep": "Categories to keep",
+  "fairer_death.configuration.categories_to_keep.button": "Categories",
+  "fairer_death.configuration.categories_to_keep.tooltip": "If mode is CATEGORIES, the items in the slot categories selected here will be kept on death. \nAllowed Values: KEEP_INVENTORY, KEEP_HOTBAR, KEEP_ARMOR, KEEP_EXPERIENCE"
 }
