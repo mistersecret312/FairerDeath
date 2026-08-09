@@ -4,7 +4,7 @@ public enum Modes
 {
 	FULL,
 	OLD,
-	RANDOM,
+	CHANCE,
 	CATEGORIES,
 	TAG
 }

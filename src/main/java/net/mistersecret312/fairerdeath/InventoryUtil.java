@@ -62,7 +62,7 @@ public class InventoryUtil
 			switch (mode)
 			{
 				case TAG -> keep = stack.is(FairerDeath.KEEP_AT_DEATH);
-				case RANDOM -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
+				case CHANCE -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
 				case CATEGORIES -> keep = keepByCategory(i, categories);
 				case FULL -> keep = true;
 			}
@@ -161,7 +161,7 @@ public class InventoryUtil
 			switch (mode)
 			{
 				case TAG -> keep = stack.is(FairerDeath.KEEP_AT_DEATH);
-				case RANDOM -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
+				case CHANCE -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
 				case CATEGORIES -> keep = categories.contains(Categories.KEEP_INVENTORY);
 				case FULL -> keep = true;
 			}
@@ -180,7 +180,7 @@ public class InventoryUtil
 		return switch (mode)
 		{
 			case CATEGORIES -> categories.contains(Categories.KEEP_EXPERIENCE) ? player.totalExperience : 0;
-			case RANDOM -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
+			case CHANCE -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
 			case OLD -> {
 				InventoryStorageAttachment tracker = player.getData(AttachmentTypeInit.STORAGE);
 				yield tracker.getKeepXpQuota(player.level().getGameTime(), Config.AGE_TICKS.get());

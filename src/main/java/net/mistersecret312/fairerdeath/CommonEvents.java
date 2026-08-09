@@ -14,7 +14,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @EventBusSubscriber(modid = FairerDeath.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -98,5 +100,7 @@ public class CommonEvents
 
 		if (storage.keptExperience > 0)
 			serverPlayer.giveExperiencePoints(storage.keptExperience);
+
+		serverPlayer.getData(AttachmentTypeInit.STORAGE).tracker.putAll(storage.tracker);
 	}
 }
