@@ -25,7 +25,7 @@ public class InventoryUtil
 				return saved;
 
 			InventoryStorageCapability tracker = trackerOptional.get();
-			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
+			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TO_KEEP.get());
 
 			for (int i = 0; i < inv.getContainerSize(); i++)
 			{
@@ -67,7 +67,7 @@ public class InventoryUtil
 			switch (mode)
 			{
 				case TAG -> keep = stack.is(FairerDeath.KEEP_AT_DEATH);
-				case CHANCE -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
+				case CHANCE -> keep = random.nextFloat() < Config.CHANCE_TO_KEEP.get();
 				case CATEGORIES -> keep = keepByCategory(i, categories);
 				case FULL -> keep = true;
 			}
@@ -97,7 +97,7 @@ public class InventoryUtil
 				return saved;
 
 			InventoryStorageCapability tracker = trackerOptional.get();
-			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
+			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TO_KEEP.get());
 
 			while (iterator.hasNext())
 			{
@@ -171,7 +171,7 @@ public class InventoryUtil
 			switch (mode)
 			{
 				case TAG -> keep = stack.is(FairerDeath.KEEP_AT_DEATH);
-				case CHANCE -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
+				case CHANCE -> keep = random.nextFloat() < Config.CHANCE_TO_KEEP.get();
 				case CATEGORIES -> keep = categories.contains(Categories.KEEP_INVENTORY);
 				case FULL -> keep = true;
 			}
@@ -190,7 +190,7 @@ public class InventoryUtil
 		return switch (mode)
 		{
 			case CATEGORIES -> categories.contains(Categories.KEEP_EXPERIENCE) ? player.totalExperience : 0;
-			case CHANCE -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
+			case CHANCE -> new Random().nextFloat() < Config.CHANCE_TO_KEEP.get() ? player.totalExperience : 0;
 			case AGE -> {
 				Optional<InventoryStorageCapability> trackerOptional =
 						player.getCapability(CapabilityInit.STORAGE).resolve();
@@ -198,7 +198,7 @@ public class InventoryUtil
 					yield 0;
 
 				InventoryStorageCapability tracker = trackerOptional.get();
-				yield tracker.getKeepXpQuota(player.level().getGameTime(), Config.AGE_TICKS.get());
+				yield tracker.getKeepXpQuota(player.level().getGameTime(), Config.AGE_TO_KEEP.get());
 			}
 			case FULL -> player.totalExperience;
 			case TAG -> 0;

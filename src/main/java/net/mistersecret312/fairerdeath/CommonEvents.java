@@ -25,7 +25,7 @@ public class CommonEvents
 		if (event.player.level().isClientSide() || event.player.tickCount % 20 != 0)
 			return;
 
-		if (Config.MODE.get() == Modes.AGE && event.player instanceof ServerPlayer player)
+		if (Config.KEEPING_MODE.get() == Modes.AGE && event.player instanceof ServerPlayer player)
 		{
 			Optional<InventoryStorageCapability> trackerOptional =
 					player.getCapability(CapabilityInit.STORAGE).resolve();
@@ -49,7 +49,7 @@ public class CommonEvents
 			return;
 
 		InventoryStorageCapability tracker = trackerOptional.get();
-		Modes mode = Config.MODE.get();
+		Modes mode = Config.KEEPING_MODE.get();
 		Set<Categories> categories = Config.getEnabledCategories();
 
 		List<InventoryStorageCapability.Item> keptItems = InventoryUtil.extractItems(player, mode, categories, tracker.droppedItems);
@@ -70,7 +70,7 @@ public class CommonEvents
 			return;
 
 		InventoryStorageCapability tracker = trackerOptional.get();
-		Modes mode = Config.MODE.get();
+		Modes mode = Config.KEEPING_MODE.get();
 		Set<Categories> categories = Config.getEnabledCategories();
 
 		List<InventoryStorageCapability.Item> keptDrops = InventoryUtil.extractItems(player, event.getDrops(), mode, categories, tracker.droppedItems);
