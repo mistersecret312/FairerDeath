@@ -21,7 +21,7 @@ public class Config
     {
         MODE = SERVER_BUILDER
                        .comment("Current Mode")
-                       .defineEnum("mode", Modes.OLD);
+                       .defineEnum("mode", Modes.AGE);
         RANDOM_CHANCE = SERVER_BUILDER
                                 .comment("If Mode is Random, will use this chance for the chance to keep an item")
                                 .defineInRange("random_chance", 0.5d, 0d, 1d);

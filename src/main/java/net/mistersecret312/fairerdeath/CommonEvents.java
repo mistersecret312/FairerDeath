@@ -28,7 +28,7 @@ public class CommonEvents
 		if (event.getEntity().level().isClientSide() || event.getEntity().tickCount % 20 != 0)
 			return;
 
-		if (Config.MODE.get() == Modes.OLD && event.getEntity() instanceof ServerPlayer player)
+		if (Config.MODE.get() == Modes.AGE && event.getEntity() instanceof ServerPlayer player)
 		{
 			InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
 			storage.updateTracker(player);

@@ -3,7 +3,7 @@ package net.mistersecret312.fairerdeath;
 public enum Modes
 {
 	FULL,
-	OLD,
+	AGE,
 	CHANCE,
 	CATEGORIES,
 	TAG

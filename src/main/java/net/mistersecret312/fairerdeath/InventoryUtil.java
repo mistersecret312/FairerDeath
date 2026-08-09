@@ -17,7 +17,7 @@ public class InventoryUtil
 		Inventory inv = player.getInventory();
 		Random random = new Random();
 
-		if (mode == Modes.OLD)
+		if (mode == Modes.AGE)
 		{
 			InventoryStorageAttachment tracker = player.getData(AttachmentTypeInit.STORAGE);
 			Map<ItemKey, Integer> quotas = tracker.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
@@ -84,7 +84,7 @@ public class InventoryUtil
 		Random random = new Random();
 		Iterator<ItemEntity> iterator = drops.iterator();
 
-		if (mode == Modes.OLD) 
+		if (mode == Modes.AGE) 
 		{
 			InventoryStorageAttachment storage = player.getData(AttachmentTypeInit.STORAGE);
 			Map<ItemKey, Integer> quotas = storage.getKeepQuotas(player.level().getGameTime(), Config.AGE_TICKS.get());
@@ -181,7 +181,7 @@ public class InventoryUtil
 		{
 			case CATEGORIES -> categories.contains(Categories.KEEP_EXPERIENCE) ? player.totalExperience : 0;
 			case CHANCE -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
-			case OLD -> {
+			case AGE -> {
 				InventoryStorageAttachment tracker = player.getData(AttachmentTypeInit.STORAGE);
 				yield tracker.getKeepXpQuota(player.level().getGameTime(), Config.AGE_TICKS.get());
 			}
