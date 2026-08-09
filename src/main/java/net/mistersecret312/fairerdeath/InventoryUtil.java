@@ -17,7 +17,7 @@ public class InventoryUtil
 		Inventory inv = player.getInventory();
 		Random random = new Random();
 
-		if (mode == Modes.OLD)
+		if (mode == Modes.AGE)
 		{
 			Optional<InventoryStorageCapability> trackerOptional =
 					player.getCapability(CapabilityInit.STORAGE).resolve();
@@ -67,7 +67,7 @@ public class InventoryUtil
 			switch (mode)
 			{
 				case TAG -> keep = stack.is(FairerDeath.KEEP_AT_DEATH);
-				case RANDOM -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
+				case CHANCE -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
 				case CATEGORIES -> keep = keepByCategory(i, categories);
 				case FULL -> keep = true;
 			}
@@ -89,7 +89,7 @@ public class InventoryUtil
 		Random random = new Random();
 		Iterator<ItemEntity> iterator = drops.iterator();
 
-		if (mode == Modes.OLD) 
+		if (mode == Modes.AGE) 
 		{
 			Optional<InventoryStorageCapability> trackerOptional =
 					player.getCapability(CapabilityInit.STORAGE).resolve();
@@ -171,7 +171,7 @@ public class InventoryUtil
 			switch (mode)
 			{
 				case TAG -> keep = stack.is(FairerDeath.KEEP_AT_DEATH);
-				case RANDOM -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
+				case CHANCE -> keep = random.nextFloat() < Config.RANDOM_CHANCE.get();
 				case CATEGORIES -> keep = categories.contains(Categories.KEEP_INVENTORY);
 				case FULL -> keep = true;
 			}
@@ -190,8 +190,8 @@ public class InventoryUtil
 		return switch (mode)
 		{
 			case CATEGORIES -> categories.contains(Categories.KEEP_EXPERIENCE) ? player.totalExperience : 0;
-			case RANDOM -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
-			case OLD -> {
+			case CHANCE -> new Random().nextFloat() < Config.RANDOM_CHANCE.get() ? player.totalExperience : 0;
+			case AGE -> {
 				Optional<InventoryStorageCapability> trackerOptional =
 						player.getCapability(CapabilityInit.STORAGE).resolve();
 				if(trackerOptional.isEmpty())

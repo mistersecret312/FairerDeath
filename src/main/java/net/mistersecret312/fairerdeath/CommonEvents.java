@@ -25,7 +25,7 @@ public class CommonEvents
 		if (event.player.level().isClientSide() || event.player.tickCount % 20 != 0)
 			return;
 
-		if (Config.MODE.get() == Modes.OLD && event.player instanceof ServerPlayer player)
+		if (Config.MODE.get() == Modes.AGE && event.player instanceof ServerPlayer player)
 		{
 			Optional<InventoryStorageCapability> trackerOptional =
 					player.getCapability(CapabilityInit.STORAGE).resolve();
